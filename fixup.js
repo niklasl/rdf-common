@@ -55,3 +55,24 @@ function noSelfCite(utils, content) {
     return content;
   }
 }
+
+// See <https://respec.org/docs/#example-load-custom-syntax-highlighting-language>.
+function highlightLoader(lang, langURL, propName) {
+  langURL = new URL(langURL, window.location).href;
+  return async function () {
+    const worker = await new Promise(resolve => {
+      require(["core/worker"], ({ worker }) => resolve(worker));
+    });
+    const action = "highlight-load-lang";
+    worker.postMessage({ action, langURL, propName, lang });
+    return new Promise(resolve => {
+      worker.addEventListener("message", function listener({ data }) {
+        const { action: responseAction, lang: responseLang } = data;
+        if (responseAction === action && responseLang === lang) {
+          worker.removeEventListener("message", listener);
+          resolve();
+        }
+      });
+    });
+  }
+}
