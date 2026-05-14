@@ -60,9 +60,7 @@ function noSelfCite(utils, content) {
 function highlightLoader(lang, langURL, propName) {
   langURL = new URL(langURL, window.location).href;
   return async function () {
-    const worker = await new Promise(resolve => {
-      require(["core/worker"], ({ worker }) => resolve(worker));
-    });
+    const worker = await document.respec.worker;
     const action = "highlight-load-lang";
     worker.postMessage({ action, langURL, propName, lang });
     return new Promise(resolve => {
